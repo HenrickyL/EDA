@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <climits>
 #include "Tree.h"
 
 struct Node {
@@ -16,11 +15,18 @@ struct Node {
     }
 };
 
+Tree::Tree() {
+    _root = nullptr;
+}
 
 Tree::Tree(std::string serial) {
     _root = nullptr;
     std::stringstream ss(serial);
     _serializeTree(ss, &_root);
+}
+
+Tree::~Tree() {
+    _root = _clear(_root);
 }
 
 void Tree::_serializeTree(std::stringstream& ss, Node **node) {
@@ -34,10 +40,6 @@ void Tree::_serializeTree(std::stringstream& ss, Node **node) {
     _serializeTree(ss, &((*node)->right));
 }
 
-Tree::~Tree() {
-    _clear(_root);
-}
-
 Node *Tree::_clear(Node *node) {
     if(node != nullptr) { // caso geral: vamos liberar essa arvore
         node->left = _clear(node->left);
@@ -49,6 +51,7 @@ Node *Tree::_clear(Node *node) {
 
 void Tree::inorder() {
     _inorder(_root);
+    std::cout << std::endl;
 }
 
 void Tree::_inorder(Node *node) {
@@ -80,68 +83,36 @@ void Tree::_bshow(Node *node, std::string heranca) {
 }
 
 
-int Tree::sum_keys() { // TODO
-    return _sum_keys(_root);
+bool Tree::identical(Tree *t) { // TODO
+    return _identical(this->_root, t->_root);
 }
 
-int Tree::_sum_keys(Node *node) { // TODO
-    if(node == nullptr)
-        return 0;
-    else{
-        return node->key + _sum_keys(node->left)+ _sum_keys(node->right);
+bool Tree::_identical(Node *nd1, Node *nd2) { // TODO
+    if(nd1 == nullptr && nd2 == nullptr)
+        return true;
+    if( nd1 != nullptr && nd2 != nullptr &&  nd1->key == nd2->key){
+        return true && _identical(nd1->left, nd2->left) && _identical(nd1->right, nd2->right);
     }
+    return false;
 }
 
-// Para fazer essa funcao, suponha que as arvores dos testes nunca serao vazias,
-// assim, sempre havera um menor valor de chave a ser retornado
-int Tree::min_key() { // TODO
-    return _min_key(_root);
-}
+Tree *Tree::clone() { // TODO
+    Tree* t = new Tree();
+    t->_root = _clone(_root);
+    return t;
+}   
 
-
-// Supoe que o ponteiro recebido sempre eh diferente de nullptr
-int Tree::_min_key(Node *node) { // TODO
-    if(node ==  nullptr)
-        return INT_MAX;
+Node *Tree::_clone(Node *node) { // TODO
+    if(node == nullptr)
+        return nullptr;
     else{
-        int minLeft = _min_key(node->left);
-        int minRight = _min_key(node->right);
-        if(node->key < minLeft &&  node->key < minRight) 
-            return node->key;
-        if(minLeft < node->key &&  minLeft < minRight)
-            return minLeft;
-        else
-            return minRight;
-    } 
-}
-
-int Tree::total_internal_nodes() { // TODO
-    return _total_internal_nodes(_root);
-}
-    
-int Tree::_total_internal_nodes(Node *node) { // TODO
-    if(node == nullptr)
-        return 0;
-    if( (node->left != nullptr && node->right != nullptr)   ||
-        (node->left != nullptr && node->right == nullptr)   ||
-        (node->left == nullptr && node->right != nullptr))
-        {
-            return 1 +_total_internal_nodes(node->left) + _total_internal_nodes(node->right);
-        }
-    return _total_internal_nodes(node->left) + _total_internal_nodes(node->right);
-}
-
-int Tree::um_filho() { // TODO
-    return _um_filho(_root);
-}
-
-int Tree::_um_filho(Node *node) { // TODO
-    if(node == nullptr)
-        return 0;
-    if((node->left != nullptr && node->right != nullptr)||
-    (node->left == nullptr && node->right == nullptr))
-        return 0 + _um_filho(node->left) + _um_filho(node->right);
-    return 1 + _um_filho(node->left) + _um_filho(node->right);
+        std::cout << node->key<< " - " << std::endl;
+        Node* left = _clone(node->left);
+        Node* right = _clone(node->right);
+         std::cout << "\t";
+        Node* newNode = new Node(node->key,left, right);
+        return newNode;
+    }
 }
 
 

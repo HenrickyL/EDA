@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <climits>
 #include "Tree.h"
 
 struct Node {
@@ -17,11 +16,13 @@ struct Node {
 };
 
 
+// Construtor
 Tree::Tree(std::string serial) {
     _root = nullptr;
     std::stringstream ss(serial);
     _serializeTree(ss, &_root);
 }
+
 
 void Tree::_serializeTree(std::stringstream& ss, Node **node) {
     std::string value;
@@ -34,9 +35,11 @@ void Tree::_serializeTree(std::stringstream& ss, Node **node) {
     _serializeTree(ss, &((*node)->right));
 }
 
+
 Tree::~Tree() {
-    _clear(_root);
+    _root = _clear(_root);
 }
+
 
 Node *Tree::_clear(Node *node) {
     if(node != nullptr) { // caso geral: vamos liberar essa arvore
@@ -45,6 +48,18 @@ Node *Tree::_clear(Node *node) {
         delete node;
     }
     return nullptr;
+}
+
+void Tree::preorder() {
+    _preorder(_root);
+}
+
+void Tree::_preorder(Node *node) {
+    if(node != nullptr) { // Caso Geral
+        std::cout << node->key << " ";
+        _preorder(node->left);
+        _preorder(node->right);
+    }
 }
 
 void Tree::inorder() {
@@ -80,68 +95,56 @@ void Tree::_bshow(Node *node, std::string heranca) {
 }
 
 
-int Tree::sum_keys() { // TODO
-    return _sum_keys(_root);
+int Tree::count_leaves() { // TODO
+    return _count_leaves(_root);
 }
 
-int Tree::_sum_keys(Node *node) { // TODO
+int Tree::_count_leaves(Node *node) { // TODO
     if(node == nullptr)
         return 0;
+    if(node->left == nullptr && node->right == nullptr)
+        return 1 + _count_leaves(node->left) + _count_leaves(node->right);
+    return _count_leaves(node->left) + _count_leaves(node->right);
+}
+
+void Tree::delete_leaves() { // TODO
+   _root = _delete_leaves(_root);
+}
+
+Node* Tree::_delete_leaves(Node *node) { // TODO
+    if(node == nullptr)
+        return nullptr;
+    if(node->left == nullptr && node->right == nullptr){
+        delete node;
+        return nullptr;
+    }
     else{
-        return node->key + _sum_keys(node->left)+ _sum_keys(node->right);
+        Node* left = _delete_leaves(node->left);
+        Node* right = _delete_leaves(node->right);
+        node->left = left;
+        node->right = right;
+        return node;
     }
 }
 
-// Para fazer essa funcao, suponha que as arvores dos testes nunca serao vazias,
-// assim, sempre havera um menor valor de chave a ser retornado
-int Tree::min_key() { // TODO
-    return _min_key(_root);
+void Tree::delete_leaves_with_value(int key) { // TODO
+    _root =_delete_leaves_with_value(key, _root);
 }
 
-
-// Supoe que o ponteiro recebido sempre eh diferente de nullptr
-int Tree::_min_key(Node *node) { // TODO
-    if(node ==  nullptr)
-        return INT_MAX;
+Node* Tree::_delete_leaves_with_value(int key, Node *node) { // TODO
+    if(node == nullptr)
+        return nullptr;
+    if(node->key == key && (node->left == nullptr && node->right == nullptr)){
+        delete node;
+        return nullptr;
+    }
     else{
-        int minLeft = _min_key(node->left);
-        int minRight = _min_key(node->right);
-        if(node->key < minLeft &&  node->key < minRight) 
-            return node->key;
-        if(minLeft < node->key &&  minLeft < minRight)
-            return minLeft;
-        else
-            return minRight;
-    } 
-}
-
-int Tree::total_internal_nodes() { // TODO
-    return _total_internal_nodes(_root);
-}
-    
-int Tree::_total_internal_nodes(Node *node) { // TODO
-    if(node == nullptr)
-        return 0;
-    if( (node->left != nullptr && node->right != nullptr)   ||
-        (node->left != nullptr && node->right == nullptr)   ||
-        (node->left == nullptr && node->right != nullptr))
-        {
-            return 1 +_total_internal_nodes(node->left) + _total_internal_nodes(node->right);
-        }
-    return _total_internal_nodes(node->left) + _total_internal_nodes(node->right);
-}
-
-int Tree::um_filho() { // TODO
-    return _um_filho(_root);
-}
-
-int Tree::_um_filho(Node *node) { // TODO
-    if(node == nullptr)
-        return 0;
-    if((node->left != nullptr && node->right != nullptr)||
-    (node->left == nullptr && node->right == nullptr))
-        return 0 + _um_filho(node->left) + _um_filho(node->right);
-    return 1 + _um_filho(node->left) + _um_filho(node->right);
+        Node* left = _delete_leaves_with_value(key, node->left);
+        Node* right = _delete_leaves_with_value(key, node->right);
+        node->left = left;
+        node->right = right;
+        return node;
+    }
 }
 
 
